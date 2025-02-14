@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,11 +29,7 @@ public class FileSystemTiledReader extends TiledReader {
     
     @Override
     public final String getCanonicalPath(String path) {
-        try {
-            return new File(path).getCanonicalPath();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return path;
     }
     
     @Override
@@ -42,11 +39,20 @@ public class FileSystemTiledReader extends TiledReader {
     
     @Override
     public final InputStream getInputStream(String path) {
-        try {
-            return new FileInputStream(new File(path));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+        File file = new File(path);
+        if (file.exists()) {
+            try {
+                return new FileInputStream(file);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException("File non trovato nel file system: " + path, e);
+            }
         }
+        // Se il file non esiste nel file system, prova dal classpath (JAR)
+        InputStream stream = getClass().getClassLoader().getResourceAsStream(path);
+        if (stream == null) {
+            throw new RuntimeException("File non trovato nel JAR: " + path);
+        }
+        return stream;
     }
     
     @Override
