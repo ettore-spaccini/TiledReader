@@ -40,7 +40,7 @@ public class FileSystemTiledReader extends TiledReader {
     @Override
     public final InputStream getInputStream(String path) {
         path = path.replaceAll("^.*/../", "");
-        path = path.replaceAll("^.*\\..\\", "");
+        path = path.replaceAll("^.*\\.\\.\\\\", "");
         File file = new File(path);
         if (file.exists()) {
             try {
